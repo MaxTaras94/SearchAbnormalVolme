@@ -30,8 +30,7 @@ class UpdaterFOREX():
         'GBPNZD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY','USDSGD',
         'XAGUSD','XAUUSD','FTSE100','IBEX35','NIKK225','SPX500','ASX200',
         'CAC40','HSI50','NG','NQ100','STOXX50','BRN','WTI','GER40',
-        'GER40','NQ100','SPX500','WSt30'
-]
+        'GER40','NQ100','SPX500']
         self._cach = {'time':datetime.datetime.today(), 'tickers':{}}
         
     def initialize_terminal(self):
@@ -91,7 +90,7 @@ class UpdaterFOREX():
             try:
                 for ticker in self.check_name:
                     print(f'Проверяю наличие поглощений для тикера {ticker}', end="\r")
-                    candles_frame = self.response_to_mt5(ticker, "M30", 0, 2)
+                    candles_frame = self.response_to_mt5(ticker, "M30", 1, 2)
                     candles_frame['typeCandle'] = ['Bull' if candles_frame.loc[item, "open"] < candles_frame.loc[item, "close"] else 'Bear' for item in range(len(candles_frame))]
                     candles_frame['ticker'] = ticker
                     if candles_frame.loc[1, "close"] > candles_frame.loc[0, "open"] and candles_frame.loc[1, "typeCandle"] != candles_frame.loc[0, "typeCandle"]:

@@ -93,9 +93,9 @@ class UpdaterFOREX():
                     candles_frame = self.response_to_mt5(ticker, "M30", 1, 2)
                     candles_frame['typeCandle'] = ['Bull' if candles_frame.loc[item, "open"] < candles_frame.loc[item, "close"] else 'Bear' for item in range(len(candles_frame))]
                     candles_frame['ticker'] = ticker
-                    if candles_frame.loc[1, "close"] > candles_frame.loc[0, "open"] and candles_frame.loc[1, "typeCandle"] != candles_frame.loc[0, "typeCandle"]:
+                    if all([candles_frame.loc[1, "typeCandle"] == "Bull", candles_frame.loc[1, "close"] > candles_frame.loc[0, "open"], candles_frame.loc[0, "typeCandle"] == "Bear"]):
                         await sender.send_message(message_generator.bullish_takeover(candles_frame))
-                    elif (candles_frame.loc[1, "close"] < candles_frame.loc[0, "open"] and candles_frame.loc[1, "typeCandle"] != candles_frame.loc[0, "typeCandle"]):
+                    elif all([candles_frame.loc[1, "typeCandle"] == "Bear", candles_frame.loc[1, "close"] < candles_frame.loc[0, "open"], candles_frame.loc[0, "typeCandle"] == "Bull"]):
                         await sender.send_message(message_generator.bearish_takeover(candles_frame))
             except Exception as ke:
                 print(f'Ошибка по тикеру {ticker}')
