@@ -58,7 +58,7 @@ class GenerateTextMessage():
         text += f"<b>‼️ MARKET MOVEMENT  upd. {time}</b>\n\n"
         text += f"<b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
         candle_time = pd.to_datetime(row['time'], unit='s')[0].strftime("%d.%m.%Y %H:%M:%S")
-        text += "<u>Бычье поглощение</u> 🔴\n"
+        text += "<u>Медвежье поглощение</u> 🔴\n"
         text += f"Время свечи поглощения: <b>{candle_time}</b>"
         return text
         

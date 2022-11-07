@@ -17,12 +17,12 @@ import time
 from SenderMessagesInChannel import sender
 
 
-
 class UpdaterFOREX():
     
     """
     Данный класс создан для получения аномалий в объёмах и ценовых спрэдах
-    для заданного списка инструментов напрямую от брокера Amarkets
+    для заданного списка инструментов напрямую от выбранного брокера путем
+    интеграции через терминал MT5
     """
     
     def __init__(self):
@@ -30,7 +30,7 @@ class UpdaterFOREX():
         'GBPNZD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY','USDSGD',
         'XAGUSD','XAUUSD','FTSE100','IBEX35','NIKK225','SPX500','ASX200',
         'CAC40','HSI50','NG','NQ100','STOXX50','BRN','WTI','GER40',
-        'GER40_m','NQ100_m','SPX500_m','WSt30_m'
+        'GER40','NQ100','SPX500','WSt30'
 ]
         self._cach = {'time':datetime.datetime.today(), 'tickers':{}}
         
@@ -59,6 +59,7 @@ class UpdaterFOREX():
     def response_to_mt5(self, ticker, TF, index, count):
         dict_TF = {"M1": mt5.TIMEFRAME_M1,
                    "M5": mt5.TIMEFRAME_M5,
+                   "M30": mt5.TIMEFRAME_M30,
                    "D1": mt5.TIMEFRAME_D1}
         return pd.DataFrame(mt5.copy_rates_from_pos(ticker, dict_TF[TF], index, count))
     
@@ -85,6 +86,21 @@ class UpdaterFOREX():
             print(f'По паре {ticker} аномалий не выявлено! delta = {delta} | текущий объём свечи:  {rate_one_candle.tick_volume.values[0]} | средний объём:  {rate_many_candles.tick_volume.mean()}')
         return True
   
+    async def search_takeovers(self):
+        if self.__log_account_mt5():
+            try:
+                for ticker in self.check_name:
+                    print(f'Проверяю наличие поглощений для тикера {ticker}', end="\r")
+                    candles_frame = self.response_to_mt5(ticker, "M30", 1, 2)
+                    candles_frame['typeCandle'] = ['Bull' if candles_frame.loc[item, "open"] < candles_frame.loc[item, "close"] else 'Bear' for item in range(len(candles_frame))]
+                    candles_frame['ticker'] = ticker
+                    if candles_frame.loc[1, "close"] > candles_frame.loc[0, "open"] and candles_frame.loc[1, "typeCandle"] != candles_frame.loc[0, "typeCandle"]:
+                        await sender.send_message(message_generator.bullish_takeover(candles_frame))
+                    elif (candles_frame.loc[1, "close"] < candles_frame.loc[0, "open"] and candles_frame.loc[1, "typeCandle"] != candles_frame.loc[0, "typeCandle"]):
+                        await sender.send_message(message_generator.bearish_takeover(candles_frame))
+            except Exception as ke:
+                print(f'Ошибка по тикеру {ticker}')
+            
     
     async def checking_for_abnormal_volume_forex(self):
         if self.__log_account_mt5():
@@ -103,7 +119,7 @@ class UpdaterFOREX():
                     except Exception as ke:
                         print(f'Ошибка пара {ticker} при конвертировании времени по инструменту {ticker}. Датафрейм свечи: {rate_one_candle}', exc_info=ke)
                         continue
-                    time_curr_candle = pd.Timestamp(rate_one_candle['time'].values[0]).to_pydatetime()
+                    time_curr_candle = pd.Timestamp(rate_one_candle['time'].values[0]).to_pydatetime()+datetime.timedelta(hours=1)
                     if rate_one_candle.empty:
                         print(f'Для пары {ticker} нет котировок. Датафрейм текущей свечи {rate_one_candle}')
                         continue  

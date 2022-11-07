@@ -91,7 +91,7 @@ class UpdaterFOREX():
             try:
                 for ticker in self.check_name:
                     print(f'Проверяю наличие поглощений для тикера {ticker}', end="\r")
-                    candles_frame = self.response_to_mt5(ticker, "M30", 1, 2)
+                    candles_frame = self.response_to_mt5(ticker, "M30", 0, 2)
                     candles_frame['typeCandle'] = ['Bull' if candles_frame.loc[item, "open"] < candles_frame.loc[item, "close"] else 'Bear' for item in range(len(candles_frame))]
                     candles_frame['ticker'] = ticker
                     if candles_frame.loc[1, "close"] > candles_frame.loc[0, "open"] and candles_frame.loc[1, "typeCandle"] != candles_frame.loc[0, "typeCandle"]:
@@ -99,7 +99,7 @@ class UpdaterFOREX():
                     elif (candles_frame.loc[1, "close"] < candles_frame.loc[0, "open"] and candles_frame.loc[1, "typeCandle"] != candles_frame.loc[0, "typeCandle"]):
                         await sender.send_message(message_generator.bearish_takeover(candles_frame))
             except Exception as ke:
-                print(f'Ошибка по тикеру {ticker}', exc_info=ke)
+                print(f'Ошибка по тикеру {ticker}')
             
     
     async def checking_for_abnormal_volume_forex(self):
