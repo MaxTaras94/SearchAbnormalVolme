@@ -85,14 +85,12 @@ class UpdaterFOREX():
         elif all([rate_one_candle.candle_body.values[0] == "Bull",
                 rate_one_candle.close.values[0] > rate_many_candles.open.values[-2],
                 rate_many_candles.candle_body.values[-2] == "Bear",
-                any(all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers])))
-                ]):
+                any(all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]))]):
             await sender.send_message(message_generator.bullish_takeover(rate_many_candles))
         elif all([rate_one_candle.candle_body.values[0] == "Bear",
                 rate_one_candle.close.values[0] < rate_many_candles.open.values[-2],
                 rate_many_candles.candle_body.values[-2] == "Bull",
-                any(all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers])))
-                ]):
+                any(all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]))]):
             await sender.send_message(message_generator.bullish_takeover(rate_many_candles))
         else:
             print(f'По паре {ticker} аномалий не выявлено! delta = {delta} | текущий объём свечи:  {rate_one_candle.tick_volume.values[0]} | средний объём:  {rate_many_candles.tick_volume.mean()}')
