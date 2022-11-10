@@ -26,11 +26,8 @@ class ForexUpdater():
         finished = False
         while not finished:
             try:
-                if datetime.datetime.now().minute == 30 or datetime.datetime.now().minute == 0:
-                    await updater_forex.search_takeovers()
                 await self.sleeping_for_update()
                 await updater_forex.checking_for_abnormal_volume_forex()
-                
             except Exception as e:
                 print(f'Ошибка -- {e}')              
         
