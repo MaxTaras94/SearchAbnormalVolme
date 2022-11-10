@@ -111,7 +111,7 @@ class UpdaterFOREX():
                     try:
                         rate_one_candle['time'] = pd.to_datetime(rate_one_candle['time'], unit='s')
                     except Exception as ke:
-                        print(f'Ошибка пара {ticker} при конвертировании времени по инструменту {ticker}. Датафрейм свечи: {rate_one_candle}', exc_info=ke)
+                        print(f'Ошибка: {ke} пара {ticker} при конвертировании времени по инструменту {ticker}. Датафрейм свечи: {rate_one_candle}')
                         continue
                     time_curr_candle = pd.Timestamp(rate_one_candle['time'].values[0]).to_pydatetime()+datetime.timedelta(hours=1)
                     if rate_one_candle.empty:
@@ -122,7 +122,7 @@ class UpdaterFOREX():
                     try:
                         delta_price = float(Decimal(float((rate_one_candle.close - rate_d1_candles.close.values[-1])/rate_d1_candles.close.values[-1])*100).quantize(Decimal("1.00"), ROUND_HALF_EVEN))
                     except Exception as ae:
-                        print(f'Ошибка по паре {ticker}', exc_info=ae)
+                        print(f'Ошибка: {ae} пара: {ticker}')
                         continue
                     if (time_now_for_checking - time_curr_candle).seconds >= 600:
                         print(f'Для пары {ticker} последние данные по свече {time_curr_candle} Время проверки {time_now_for_checking}\nПерехожу к следующему инструменту в списке')
