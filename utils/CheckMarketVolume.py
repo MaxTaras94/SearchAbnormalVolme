@@ -85,12 +85,12 @@ class UpdaterFOREX():
         elif all([rate_one_candle.candle_body.values[0] == "Bull",
                 rate_one_candle.close.values[0] > rate_many_candles.open.values[-2],
                 rate_many_candles.candle_body.values[-2] == "Bear",
-                any(all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]))]):
+                any([all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers])])]):
             await sender.send_message(message_generator.bullish_takeover(rate_many_candles))
         elif all([rate_one_candle.candle_body.values[0] == "Bear",
                 rate_one_candle.close.values[0] < rate_many_candles.open.values[-2],
                 rate_many_candles.candle_body.values[-2] == "Bull",
-                any(all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]))]):
+                any([all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 2.5, ticker not in metals_tickers])])]):
             await sender.send_message(message_generator.bullish_takeover(rate_many_candles))
         else:
             print(f'По паре {ticker} аномалий не выявлено! delta = {delta} | текущий объём свечи:  {rate_one_candle.tick_volume.values[0]} | средний объём:  {rate_many_candles.tick_volume.mean()}')
@@ -131,7 +131,7 @@ class UpdaterFOREX():
                     rate_many_candles['time'] = pd.to_datetime(rate_many_candles['time'], unit='s')
                     rate_many_candles['spread_candle'] = abs(rate_many_candles.open - rate_many_candles.close)*trade_tick_size
                     rate_many_candles['high_density'] = rate_many_candles.tick_volume/rate_many_candles.spread_candle
-                    rate_many_candles['candle_body'] = 'Bull' if rate_many_candles.open < rate_many_candles.close else 'Bear'
+                    rate_many_candles['candle_body'] = ['Bull' if rate_many_candles.open.values[i] < rate_many_candles.close.values[i] else 'Bear' for i in range(len(rate_many_candles))]
                     previously_candle = self.response_to_mt5(ticker, "M5", 2, 1)
                     try:
                         rate_one_candle['chg. price %'] = Decimal(float((rate_one_candle.close - previously_candle.close)/previously_candle.close)*100).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
@@ -141,7 +141,7 @@ class UpdaterFOREX():
                     rate_one_candle['chg. price_day %'] = Decimal(delta_price).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
                     rate_one_candle['spread_candle'] = abs(rate_one_candle.open - rate_one_candle.close)*trade_tick_size
                     rate_one_candle['size_candle'] = abs(rate_one_candle.high - rate_one_candle.low)*trade_tick_size
-                    rate_one_candle['candle_body'] = 'Bull' if rate_one_candle.open < rate_one_candle.close else 'Bear'
+                    rate_one_candle['candle_body'] = ['Bull' if rate_one_candle.open.values[0] < rate_one_candle.close.values[0] else 'Bear']
                     rate_one_candle['high_density'] = rate_one_candle.tick_volume/rate_one_candle.spread_candle
                     try:                                                 
                         print('Перехожу в блок функции forex_mm')
