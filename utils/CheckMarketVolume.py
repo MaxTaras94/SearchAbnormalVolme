@@ -31,7 +31,7 @@ class UpdaterFOREX():
         'XAGUSD','XAUUSD','FTSE100','IBEX35','NIKK225','SPX500','ASX200',
         'CAC40','HSI50','NG','NQ100','STOXX50','BRN','WTI','GER40',
         'GER40','NQ100','SPX500']
-        self._cach = {'time':datetime.datetime.today(), 'tickers':{}}
+        self._cach = {'date':datetime.date.today(), 'tickers':{}}
         
     def initialize_terminal(self):
         status = mt5.initialize("C:/Program Files/Alpari MT5/terminal64.exe")
@@ -67,6 +67,7 @@ class UpdaterFOREX():
         metals_tickers = {"XAUUSD, XAGUSD"}
         spread_median = rate_many_candles.spread_candle.median()
         rate_one_candle['delta'] = delta
+        rate_one_candle['spread_median'] = spread_median
         high_density = Decimal((rate_one_candle.high_density/rate_many_candles.high_density.median()).values[0]).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
         ratio_spread_vs_size_candle = Decimal((rate_one_candle.size_candle/rate_one_candle.spread_candle).values[0]).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
         print(f"Состояние кэша на момент проверки: {self._cach}")
@@ -85,12 +86,12 @@ class UpdaterFOREX():
         elif all([rate_one_candle.candle_body.values[0] == "Bull",
                 rate_one_candle.close.values[0] > rate_many_candles.open.values[-2],
                 rate_many_candles.candle_body.values[-2] == "Bear",
-                any([all([rate_one_candle.spread_candle.values[0]/spread_median > 6, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 6, ticker not in metals_tickers])])]):
+                any([all([rate_one_candle.spread_candle.values[0]/spread_median > 10, ticker in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 6, ticker not in metals_tickers])])]):
             await sender.send_message(message_generator.bullish_takeover(rate_one_candle))
         elif all([rate_one_candle.candle_body.values[0] == "Bear",
                 rate_one_candle.close.values[0] < rate_many_candles.open.values[-2],
                 rate_many_candles.candle_body.values[-2] == "Bull",
-                any([all([rate_one_candle.spread_candle.values[0]/spread_median > 6, ticker not in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 6, ticker not in metals_tickers])])]):
+                any([all([rate_one_candle.spread_candle.values[0]/spread_median > 10, ticker in metals_tickers]), all([rate_one_candle.spread_candle.values[0]/spread_median > 6, ticker not in metals_tickers])])]):
             await sender.send_message(message_generator.bearish_takeover(rate_one_candle))
         else:
             print(f'По паре {ticker} аномалий не выявлено! delta = {delta} | текущий объём свечи:  {rate_one_candle.tick_volume.values[0]} | средний объём:  {rate_many_candles.tick_volume.mean()}')
@@ -99,9 +100,9 @@ class UpdaterFOREX():
     async def checking_for_abnormal_volume_forex(self):
         if self.__log_account_mt5():
             time_now_for_checking = datetime.datetime.today().replace(second=0).replace(microsecond=0)# - datetime.timedelta(hours=1)
-            if self._cach['time'] < datetime.datetime.today():
+            if self._cach['date'] < datetime.date.today():
                 self._cach['tickers'].clear()
-                self._cach['time'] = datetime.datetime.today()
+                self._cach['date'] = datetime.date.today()
             try:
                 for ticker in self.check_name:
                     print(f'Ищу аномалии по паре {ticker}', end="\r")
