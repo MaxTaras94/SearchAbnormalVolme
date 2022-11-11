@@ -41,7 +41,7 @@ class GenerateTextMessage():
         text = ""
         time = datetime.datetime.now().strftime("%H:%M:%S")
         candle_time = pd.to_datetime(row['time'], unit='s')[0].strftime("%d.%m.%Y %H:%M:%S")
-        text += "<u>Бычье поглощение</u> 🟢 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
+        text += f"<u>Бычье поглощение</u> 🟢 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
         text += f"Время свечи поглощения: <b>{candle_time}</b>"
         return text
     
@@ -52,7 +52,7 @@ class GenerateTextMessage():
         text = ""
         time = datetime.datetime.now().strftime("%H:%M:%S")
         candle_time = pd.to_datetime(row['time'], unit='s')[0].strftime("%d.%m.%Y %H:%M:%S")
-        text += "<u>Медвежье поглощение</u> 🔴 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
+        text += f"<u>Медвежье поглощение</u> 🔴 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
         text += f"Время свечи поглощения: <b>{candle_time}</b>"
         return text
         
@@ -73,7 +73,7 @@ class GenerateTextMessage():
         text = ""
         candle_time = pd.to_datetime(row['time'], unit='s').astype('str')[0]
         if row['chg. price %'].values[0] >= 0:
-            text += "⚠️ <u>Price growth</u> 📈 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
+            text += f"⚠️ <u>Price growth</u> 📈 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
             text += f"Abnormal spread candle within 5 minutes: <b>{spread_candle} pips</b>\n"
             text += f"Median spread of last 30k 5 minutes candles: <b>{spread_median} pips/b>\n"
             text += f"Spread growth: <b>{spread_candle // spread_median} times</b>\n"
@@ -105,7 +105,7 @@ class GenerateTextMessage():
         text = ""
         time = datetime.datetime.now().strftime("%H:%M:%S")
         candle_time = pd.to_datetime(row['time'], unit='s').astype('str')[0]
-        text += "⚠️ <u>High order density</u>🔝 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
+        text += f"⚠️ <u>High order density</u>🔝 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
         text += f"Spread candle within 5 minutes: <b>{spread_candle} pips</b>\n"
         text += f"Candle body: <b>{row['candle_body'].values[0]}</b>\n"
         text += f"Density growth: <b>{high_density} times</b>\n"
