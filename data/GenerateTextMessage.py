@@ -29,7 +29,7 @@ class GenerateTextMessage():
         candle_time = pd.to_datetime(row['time'], unit='s')[0].strftime("%d.%m.%Y %H:%M:%S")
         text += "⚠️ <u>Volume spike</u> 📊 <b>Ticker: #{row['ticker'].values[0].replace('&', '').replace('_i', '')}</b>\n\n"
         text += f"Abnormal volume growth: <b>{row['delta'].values[0]} times</b>\n"
-        text += f"Price change within 5 minutes: <b>{price_chg+str(row['spread_candle'].values[0])} pips</b>\n"
+        text += f"Price change within 5 minutes: <b>{price_chg+str(round(row['spread_candle'].values[0], 0))} pips</b>\n"
         text += f"Today price change: <b>{price_chg_day}%</b>\n"
         text += f"Abnormal candle time: <b>{candle_time}</b>"
         return text
@@ -68,8 +68,8 @@ class GenerateTextMessage():
             price_chg_day = str(row['chg. price_day %'].values[0])
         else:
             price_chg_day = "+" + str(row['chg. price_day %'].values[0])
-        spread_candle = Decimal(row['spread_candle'].values[0]).quantize(Decimal('1.00'), ROUND_HALF_EVEN)
-        spread_median = Decimal(row['spread_median'].values[0]).quantize(Decimal('1.00'), ROUND_HALF_EVEN)
+        spread_candle = round(row['spread_candle'].values[0], 0)
+        spread_median = round(row['spread_median'].values[0], 0)
         text = ""
         candle_time = pd.to_datetime(row['time'], unit='s').astype('str')[0]
         if row['chg. price %'].values[0] >= 0:
