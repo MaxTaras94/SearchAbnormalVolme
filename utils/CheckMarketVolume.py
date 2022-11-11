@@ -63,7 +63,7 @@ class UpdaterFOREX():
         return pd.DataFrame(mt5.copy_rates_from_pos(ticker, dict_TF[TF], index, count))
     
     async def forex_mm(self, ticker, rate_one_candle, rate_many_candles):
-        delta = Decimal((rate_one_candle.tick_volume/rate_many_candles.tick_volume.median()).values[0]).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
+        delta = round((rate_one_candle.tick_volume/rate_many_candles.tick_volume.median()).values[0], 0)
         metals_tickers = {"XAUUSD, XAGUSD"}
         spread_median = rate_many_candles.spread_candle.median()
         rate_one_candle['delta'] = delta
