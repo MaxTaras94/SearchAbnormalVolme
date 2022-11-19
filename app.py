@@ -71,16 +71,19 @@ async def risk_pips(message: aiogram.types.Message):
     risk_buttons = InlineKeyboardMarkup()
     for risk in list_risk_buttons:
         risk_buttons.insert(risk)
-    await bot.send_message(message.chat.id, f'Выбор пал на <b>{ticker}</b>\nРазмер риска в пунктах: {pips}\nВыбери каким % от Equity рискнешь', reply_markup=risk_buttons)
+    await bot.send_message(message.chat.id, f'Выбор пал на <b>{ticker}</b>\nРазмер риска в пунктах: <b>{pips}</b>\nВыбери каким % от Equity рискнешь', reply_markup=risk_buttons)
     
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('btn_'))
 async def callback_one_of_the_tickers(callback_query: aiogram.types.CallbackQuery):
     perc_risk = callback_query.data
-    trade_tick_value = mt5.symbol_info(ticker)._asdict()['trade_tick_value']
-    volume_min = mt5.symbol_info(ticker)._asdict()['volume_min']
+    data_for_ticker = mt5.symbol_info(ticker)._asdict()
+    trade_tick_value = data_for_ticker.get('trade_tick_value', 0)
+    volume_min = data_for_ticker.get('volume_min', 0)
     price_of_tick = 10*volume_min
     risk_size = int(float(mt5.account_info()._asdict()["equity"])*(float(perc_risk.split("_")[1])/100))
-    await bot.send_message(callback_query.from_user.id, f'Тикер: <b>{ticker}</b>\nРиск в % от Equity:  <b>{int(perc_risk.split("_")[1])}</b>\nРиск в $ от Equity: <b>{str(risk_size)}</b>\nРазамер лота для входа в сделку: <b>{Decimal(volume_min*(risk_size/(price_of_tick*pips))).quantize(Decimal("1.00"), ROUND_HALF_EVEN)}</b>')
+    trade_lot = Decimal(volume_min*(risk_size/(price_of_tick*pips))).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
+    margin = mt5.order_calc_margin(mt5.ORDER_TYPE_SELL, ticker, trade_lot, data_for_ticker.get('bid', 0))
+    await bot.send_message(callback_query.from_user.id, f'Тикер: <b>{ticker}</b>\nРиск в % от Equity:  <b>{int(perc_risk.split("_")[1])}</b>\nРиск в $ от Equity: <b>{str(risk_size)}</b>\nРиск в пунктах: <b>{pips}</b>\nЛот для входа в сделку: <b>{trade_lot}</b>\nМаржа: <b>{margin}</b>')
 
 async def on_shutdown(dp):
     await on_shutdown_notify(bot)

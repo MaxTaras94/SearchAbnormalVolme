@@ -8,7 +8,7 @@ Created on Tue Nov 23 13:36:26 2021
 
 
 import datetime
-from data.config import LOGINMT5, PASSMT5, SERVERMT5, path_to_terminal
+from data.config import LOGINMT5, PASSMT5, SERVERMT5, path_to_terminal, instruments
 from data.GenerateTextMessage import message_generator
 from decimal import Decimal, ROUND_HALF_EVEN
 import MetaTrader5 as mt5
@@ -26,15 +26,11 @@ class UpdaterFOREX():
     """
     
     def __init__(self):
-        self.check_name = ['AUDNZD', 'AUDUSD','EURGBP','EURJPY','EURUSD','GBPJPY',
-        'GBPNZD','GBPUSD','NZDUSD','USDCAD','USDCHF','USDJPY','USDSGD',
-        'XAGUSD','XAUUSD','FTSE100','IBEX35','NIKK225','SPX500','ASX200',
-        'CAC40','HSI50','NG','NQ100','STOXX50','BRN','WTI','GER40',
-        'GER40','NQ100','SPX500']
+        self.check_name = instruments
         self._cach = {'date':datetime.date.today(), 'tickers':{}}
         
     def initialize_terminal(self):
-        status = mt5.initialize("C:/Program Files/Alpari MT5/terminal64.exe")
+        status = mt5.initialize(path_to_terminal)
         if not status:
             i = 0
             while i < 10:
