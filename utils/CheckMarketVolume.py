@@ -28,7 +28,7 @@ class UpdaterFOREX():
     def __init__(self):
         self.check_name = instruments
         self._cach = {'date':datetime.date.today(), 'tickers':{}}
-        
+        print(self.check_name)
     def initialize_terminal(self):
         status = mt5.initialize(path_to_terminal)
         if not status:
@@ -64,8 +64,8 @@ class UpdaterFOREX():
         spread_median = rate_many_candles.spread_candle.median()
         rate_one_candle['delta'] = delta
         rate_one_candle['spread_median'] = spread_median
-        high_density = Decimal((rate_one_candle.high_density/rate_many_candles.high_density.median()).values[0]).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
-        ratio_spread_vs_size_candle = Decimal((rate_one_candle.size_candle/rate_one_candle.spread_candle).values[0]).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
+        high_density = round((rate_one_candle.high_density/rate_many_candles.high_density.median()).values[0], 2)
+        ratio_spread_vs_size_candle = round((rate_one_candle.size_candle/rate_one_candle.spread_candle).values[0], 0)
         print(f"Состояние кэша на момент проверки: {self._cach}")
         if delta >= 3.5:
             if ticker not in self._cach['tickers']:
@@ -117,7 +117,7 @@ class UpdaterFOREX():
                     rate_one_candle['ticker_name'] = ticker
                     rate_d1_candles = self.response_to_mt5(ticker, "D1", 1, 31)
                     try:
-                        delta_price = float(Decimal(float((rate_one_candle.close - rate_d1_candles.close.values[-1])/rate_d1_candles.close.values[-1])*100).quantize(Decimal("1.00"), ROUND_HALF_EVEN))
+                        delta_price = float(round(float((rate_one_candle.close - rate_d1_candles.close.values[-1])/rate_d1_candles.close.values[-1])*100, 2))
                     except Exception as ae:
                         print(f'Ошибка: {ae} пара: {ticker}')
                         continue
@@ -131,11 +131,11 @@ class UpdaterFOREX():
                     rate_many_candles['candle_body'] = ['Bull' if rate_many_candles.open.values[i] < rate_many_candles.close.values[i] else 'Bear' for i in range(len(rate_many_candles))]
                     previously_candle = self.response_to_mt5(ticker, "M5", 2, 1)
                     try:
-                        rate_one_candle['chg. price %'] = Decimal(float((rate_one_candle.close - previously_candle.close)/previously_candle.close)*100).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
+                        rate_one_candle['chg. price %'] = round(float((rate_one_candle.close - previously_candle.close)/previously_candle.close)*100, 2)
                     except Exception as ie:
                         print(f'Ошибка по паре {ticker} --- {ie}')
                         rate_one_candle['chg. price %'] = 0.00
-                    rate_one_candle['chg. price_day %'] = Decimal(delta_price).quantize(Decimal("1.00"), ROUND_HALF_EVEN)
+                    rate_one_candle['chg. price_day %'] = round(delta_price, 2)
                     rate_one_candle['spread_candle'] = abs(rate_one_candle.open - rate_one_candle.close)*trade_tick_size
                     rate_one_candle['size_candle'] = abs(rate_one_candle.high - rate_one_candle.low)*trade_tick_size
                     rate_one_candle['candle_body'] = ['Bull' if rate_one_candle.open.values[0] < rate_one_candle.close.values[0] else 'Bear']

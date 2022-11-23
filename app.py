@@ -76,6 +76,7 @@ async def risk_pips(message: aiogram.types.Message):
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('btn_'))
 async def callback_one_of_the_tickers(callback_query: aiogram.types.CallbackQuery):
     perc_risk = callback_query.data
+    print(ticker)
     data_for_ticker = mt5.symbol_info(ticker)._asdict()
     trade_tick_value = data_for_ticker.get('trade_tick_value', 0)
     volume_min = data_for_ticker.get('volume_min', 0)
